@@ -1,0 +1,81 @@
+local Lighting = game:GetService("Lighting")
+local Terrain = workspace:FindFirstChildOfClass("Terrain")
+local RunService = game:GetService("RunService")
+local Players = game:GetService("Players")
+local Workspace = game:GetService("Workspace")
+
+-- 🔧 Reducir calidad global del cliente (si está disponible)
+pcall(function()
+    settings().Rendering.QualityLevel = Enum.QualityLevel.Level01
+end)
+
+-- 🌑 Lighting optimizado
+Lighting.GlobalShadows = false
+Lighting.FogEnd = 100000
+Lighting.Brightness = 1
+Lighting.EnvironmentDiffuseScale = 0
+Lighting.EnvironmentSpecularScale = 0
+
+-- ❌ Desactivar efectos de post-procesado
+for _, v in pairs(Lighting:GetChildren()) do
+    if v:IsA("PostEffect") then
+        v.Enabled = false
+    end
+end
+
+-- 🌊 Optimizar Terrain
+if Terrain then
+    Terrain.WaterWaveSize = 0
+    Terrain.WaterWaveSpeed = 0
+    Terrain.WaterReflectance = 0
+    Terrain.WaterTransparency = 1
+end
+
+-- 🧱 Optimizar partes y materiales
+local function optimizePart(part)
+    if part:IsA("BasePart") then
+        part.CastShadow = false
+        part.Material = Enum.Material.SmoothPlastic
+    end
+    if part:IsA("Decal") or part:IsA("Texture") then
+        part:Destroy()
+    end
+end
+
+for _, obj in pairs(Workspace:GetDescendants()) do
+    optimizePart(obj)
+end
+
+-- 🧹 Limpiar objetos pesados dinámicos al aparecer
+Workspace.DescendantAdded:Connect(function(obj)
+    optimizePart(obj)
+end)
+
+-- 🎭 Optimizar personajes
+Players.PlayerAdded:Connect(function(player)
+    player.CharacterAdded:Connect(function(char)
+        for _, obj in pairs(char:GetDescendants()) do
+            if obj:IsA("BasePart") then
+                obj.CastShadow = false
+                obj.Material = Enum.Material.SmoothPlastic
+            elseif obj:IsA("Decal") or obj:IsA("Texture") then
+                obj:Destroy()
+            end
+        end
+    end)
+end)
+
+-- ⚡ Limitar carga de render innecesaria
+RunService:Set3dRenderingEnabled(true)
+
+-- 🧠 Reducir updates innecesarios (micro-optimización)
+task.spawn(function()
+    while true do
+        task.wait(5)
+        for _, obj in pairs(Workspace:GetDescendants()) do
+            if obj:IsA("ParticleEmitter") or obj:IsA("Trail") then
+                obj.Enabled = false
+            end
+        end
+    end
+end)
