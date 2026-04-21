@@ -60,9 +60,6 @@ Players.PlayerAdded:Connect(function(player)
                 obj.Material = Enum.Material.SmoothPlastic
             elseif obj:IsA("Decal") or obj:IsA("Texture") then
                 obj:Destroy()
-for _, obj in pairs(Workspace:GetDescendants()) do
-            if obj:IsA("ParticleEmitter") or obj:IsA("Trail") then
-                obj.Enabled = false
             end
         end
     end)
@@ -72,3 +69,13 @@ end)
 RunService:Set3dRenderingEnabled(true)
 
 -- 🧠 Reducir updates innecesarios (micro-optimización)
+task.spawn(function()
+    while true do
+        task.wait(5)
+        for _, obj in pairs(Workspace:GetDescendants()) do
+            if obj:IsA("ParticleEmitter") or obj:IsA("Trail") then
+                obj.Enabled = false
+            end
+        end
+    end
+end)
